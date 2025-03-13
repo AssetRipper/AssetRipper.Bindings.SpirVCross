@@ -1,0 +1,44 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<LangVersion>Latest</LangVersion>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<IsAotCompatible>true</IsAotCompatible>
+		<CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+
+		<Version>1.0.0</Version>
+		<Authors>ds5678</Authors>
+		<Copyright>Copyright (c) 2025 ds5678</Copyright>
+		<Company>AssetRipper</Company>
+		<Description>Wrapper library for SPIRV-Cross.</Description>
+
+		<PackageId>AssetRipper.Bindings.SpirVCross</PackageId>
+		<PackageTags>C# shader spirv hlsl glsl</PackageTags>
+		<RepositoryUrl>https://github.com/AssetRipper/AssetRipper.Bindings.SpirVCross</RepositoryUrl>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<RepositoryType>git</RepositoryType>
+		<PackageProjectUrl>$(RepositoryUrl)</PackageProjectUrl>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<NoWarn>1591</NoWarn>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="../README.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Silk.NET.SPIRV.Cross" Version="2.22.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\AssetRipper.Bindings.SpirVCross.Generator\AssetRipper.Bindings.SpirVCross.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+	</ItemGroup>
+
+</Project>

@@ -1,0 +1,8 @@
+.vs/
+*.user
+obj/
+bin/
+*.user
+.idea
+.vscode/
+launchSettings.json
