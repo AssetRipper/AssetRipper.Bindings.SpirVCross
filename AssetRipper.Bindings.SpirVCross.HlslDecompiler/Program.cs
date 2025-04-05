@@ -97,8 +97,7 @@ internal static class Program
 			{
 				for (int i = 0; i < arguments.InputNames.Length; i++)
 				{
-					int index = arguments.InputNames.Length - i - 1; // Shader inputs seem to be reversed
-					SpirVReflectedResource input = stageInput[index];
+					SpirVReflectedResource input = stageInput[i];
 					string inputName = RandomName('i');
 					string realName = arguments.InputNames[i];
 					input.VariableName = inputName;
@@ -110,8 +109,7 @@ internal static class Program
 				string prefix = compiler.ExecutionModel.ToLongName() + "_input_";
 				for (int i = 0; i < stageInput.Count; i++)
 				{
-					int index = stageInput.Count - i - 1; // Shader inputs seem to be reversed
-					SpirVReflectedResource input = stageInput[index];
+					SpirVReflectedResource input = stageInput[i];
 					string inputName = RandomName('i');
 					string realName = $"{prefix}{i}";
 					input.VariableName = inputName;
@@ -124,8 +122,7 @@ internal static class Program
 			{
 				for (int i = 0; i < arguments.OutputNames.Length; i++)
 				{
-					int index = arguments.OutputNames.Length - i - 1; // Shader outputs seem to be reversed
-					SpirVReflectedResource output = stageOutput[index];
+					SpirVReflectedResource output = stageOutput[i];
 					string outputName = RandomName('o');
 					string realName = arguments.OutputNames[i];
 					output.VariableName = outputName;
@@ -137,8 +134,7 @@ internal static class Program
 				string prefix = compiler.ExecutionModel.ToLongName() + "_output_";
 				for (int i = 0; i < stageOutput.Count; i++)
 				{
-					int index = stageOutput.Count - i - 1; // Shader outputs seem to be reversed
-					SpirVReflectedResource output = stageOutput[index];
+					SpirVReflectedResource output = stageOutput[i];
 					string outputName = RandomName('o');
 					string realName = $"{prefix}{i}";
 					output.VariableName = outputName;
