@@ -73,6 +73,23 @@ public readonly unsafe ref struct SpirVType : INativeStruct<CrossType>
 			return SpirVCrossNative.TypeGetNumArrayDimensions(Pointer);
 		}
 	}
+	public uint[] ArrayDimensions
+	{
+		get
+		{
+			uint numDimensions = NumArrayDimensions;
+			if (numDimensions == 0)
+			{
+				return [];
+			}
+			uint[] dimensions = new uint[numDimensions];
+			for (uint i = 0; i < numDimensions; i++)
+			{
+				dimensions[i] = SpirVCrossNative.TypeGetArrayDimension(Pointer, i);
+			}
+			return dimensions;
+		}
+	}
 	public uint NumMemberTypes
 	{
 		get
@@ -86,8 +103,13 @@ public readonly unsafe ref struct SpirVType : INativeStruct<CrossType>
 		get
 		{
 			ThrowIfNull();
-			string?[] names = new string?[NumMemberTypes];
-			for (uint i = 0; i < NumMemberTypes; i++)
+			uint numMemberTypes = NumMemberTypes;
+			if (numMemberTypes == 0)
+			{
+				return [];
+			}
+			string?[] names = new string?[numMemberTypes];
+			for (uint i = 0; i < numMemberTypes; i++)
 			{
 				names[i] = GetMemberName(i);
 			}
