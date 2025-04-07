@@ -61,6 +61,37 @@ public readonly unsafe ref struct SpirVReflectedResource : INativeStruct<Reflect
 		}
 	}
 
+	public uint Location
+	{
+		get => GetDecoration(Decoration.Location);
+		set => SetDecoration(Decoration.Location, value);
+	}
+
+	public uint GetDecoration(Decoration decoration)
+	{
+		return Compiler.GetDecoration(VariableId, decoration);
+	}
+
+	public void SetDecoration(Decoration decoration, uint value)
+	{
+		Compiler.SetDecoration(VariableId, decoration, value);
+	}
+
+	public string? GetDecorationString(Decoration decoration)
+	{
+		return Compiler.GetDecorationString(VariableId, decoration);
+	}
+
+	public void SetDecorationString(Decoration decoration, string? value)
+	{
+		Compiler.SetDecorationString(VariableId, decoration, value);
+	}
+
+	public void SetSemantic(string semantic)
+	{
+		Compiler.AddVertexAttributeRemap(Location, semantic);
+	}
+
 	internal SpirVReflectedResource(SpirVCompiler compiler, ReflectedResource* pointer)
 	{
 		Compiler = compiler;

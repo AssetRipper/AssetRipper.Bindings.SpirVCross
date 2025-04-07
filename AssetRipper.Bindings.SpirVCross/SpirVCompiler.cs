@@ -101,6 +101,30 @@ public readonly unsafe ref struct SpirVCompiler : INativeStruct<Compiler>
 		}
 	}
 
+	public void AddVertexAttributeRemap(HlslVertexAttributeRemap remap)
+	{
+		ThrowIfNull();
+		SpirVCrossNative.CompilerHlslAddVertexAttributeRemap(Pointer, &remap, 1).ThrowIfError(Context);
+	}
+
+	public void AddVertexAttributeRemap(uint location, string semantic)
+	{
+		ThrowIfNull();
+		nint semanticPointer = Marshal.StringToHGlobalAnsi(semantic);
+		try
+		{
+			AddVertexAttributeRemap(new HlslVertexAttributeRemap
+			{
+				Location = location,
+				Semantic = (byte*)semanticPointer,
+			});
+		}
+		finally
+		{
+			Marshal.FreeHGlobal(semanticPointer);
+		}
+	}
+
 	public void BuildCombinedImageSamplers()
 	{
 		ThrowIfNull();
@@ -141,6 +165,39 @@ public readonly unsafe ref struct SpirVCompiler : INativeStruct<Compiler>
 		Resources* resources = null;
 		SpirVCrossNative.CompilerCreateShaderResources(Pointer, &resources).ThrowIfError(Context);
 		return new SpirVResources(this, resources);
+	}
+
+	public uint GetDecoration(uint id, Decoration decoration)
+	{
+		ThrowIfNull();
+		return SpirVCrossNative.CompilerGetDecoration(Pointer, id, decoration);
+	}
+
+	public void SetDecoration(uint id, Decoration decoration, uint value)
+	{
+		ThrowIfNull();
+		SpirVCrossNative.CompilerSetDecoration(Pointer, id, decoration, value);
+	}
+
+	public string? GetDecorationString(uint id, Decoration decoration)
+	{
+		ThrowIfNull();
+		byte* name = SpirVCrossNative.CompilerGetDecorationString(Pointer, id, decoration);
+		return NativeString.ToString(name);
+	}
+
+	public void SetDecorationString(uint id, Decoration decoration, string? name)
+	{
+		ThrowIfNull();
+		nint namePointer = Marshal.StringToHGlobalAnsi(name);
+		try
+		{
+			SpirVCrossNative.CompilerSetDecorationString(Pointer, id, decoration, (byte*)namePointer);
+		}
+		finally
+		{
+			Marshal.FreeHGlobal(namePointer);
+		}
 	}
 
 	public string? GetName(uint id)

@@ -95,11 +95,11 @@ internal static class Program
 			if (arguments.InputNames is not null
 				&& stageInput.Count == arguments.InputNames.Length)
 			{
-				for (int i = 0; i < arguments.InputNames.Length; i++)
+				for (int i = 0; i < stageInput.Count; i++)
 				{
 					SpirVReflectedResource input = stageInput[i];
 					string inputName = RandomName('i');
-					string realName = arguments.InputNames[i];
+					string realName = arguments.InputNames[input.Location];
 					input.VariableName = inputName;
 					pendingRenames.Add((inputName, realName));
 				}
@@ -111,7 +111,7 @@ internal static class Program
 				{
 					SpirVReflectedResource input = stageInput[i];
 					string inputName = RandomName('i');
-					string realName = $"{prefix}{i}";
+					string realName = $"{prefix}{input.Location}";
 					input.VariableName = inputName;
 					pendingRenames.Add((inputName, realName));
 				}
@@ -120,11 +120,11 @@ internal static class Program
 			if (arguments.OutputNames is not null
 				&& stageOutput.Count == arguments.OutputNames.Length)
 			{
-				for (int i = 0; i < arguments.OutputNames.Length; i++)
+				for (int i = 0; i < stageOutput.Count; i++)
 				{
 					SpirVReflectedResource output = stageOutput[i];
 					string outputName = RandomName('o');
-					string realName = arguments.OutputNames[i];
+					string realName = arguments.OutputNames[output.Location];
 					output.VariableName = outputName;
 					pendingRenames.Add((outputName, realName));
 				}
