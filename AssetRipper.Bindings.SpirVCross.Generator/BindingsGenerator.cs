@@ -47,32 +47,19 @@ public partial class BindingsGenerator() : IncrementalGenerator(nameof(BindingsG
 				continue;
 			}
 
+			ParameterInfo[] parameters = method.GetParameters();
+			if (parameters.Any(p => p.ParameterType.IsByRef))
+			{
+				// Silk.NET generates a combinatoral explosion of overloads for ref parameters.
+				continue;
+			}
+
 			writer.WriteComment(method.Name);
 			writer.Write($"public static {ToFullName(method.ReturnType)} {method.Name}(");
-			ParameterInfo[] parameters = method.GetParameters();
 			for (int i = 0; i < parameters.Length; i++)
 			{
 				ParameterInfo parameter = parameters[i];
-				if (parameter.ParameterType.IsByRef)
-				{
-					if (parameter.IsIn)
-					{
-						writer.Write("in ");
-					}
-					else if (parameter.IsOut)
-					{
-						writer.Write("out ");
-					}
-					else
-					{
-						writer.Write("ref ");
-					}
-					writer.Write(ToFullName(parameter.ParameterType.GetElementType()));
-				}
-				else
-				{
-					writer.Write(ToFullName(parameter.ParameterType));
-				}
+				writer.Write(ToFullName(parameter.ParameterType));
 				writer.Write($" {parameter.Name}");
 				if (i < parameters.Length - 1)
 				{
@@ -90,21 +77,6 @@ public partial class BindingsGenerator() : IncrementalGenerator(nameof(BindingsG
 				for (int i = 0; i < parameters.Length; i++)
 				{
 					ParameterInfo parameter = parameters[i];
-					if (parameter.ParameterType.IsByRef)
-					{
-						if (parameter.IsIn)
-						{
-							writer.Write("in ");
-						}
-						else if (parameter.IsOut)
-						{
-							writer.Write("out ");
-						}
-						else
-						{
-							writer.Write("ref ");
-						}
-					}
 					writer.Write($"{parameter.Name}");
 					if (i < parameters.Length - 1)
 					{
