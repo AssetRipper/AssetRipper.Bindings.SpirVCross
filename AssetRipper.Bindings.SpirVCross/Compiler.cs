@@ -61,6 +61,18 @@ public unsafe readonly partial struct Compiler
 		}
 	}
 
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	public ReadOnlySpan<SpecializationConstant> SpecializationConstants
+	{
+		get
+		{
+			SpecializationConstant* firstElement = null;
+			nuint count = 0;
+			GetSpecializationConstants(&firstElement, &count);
+			return firstElement == null ? default : new ReadOnlySpan<SpecializationConstant>(firstElement, (int)count);
+		}
+	}
+
 	internal Compiler(OpaqueCompiler* pointer, Context context)
 	{
 		Handle = pointer;
