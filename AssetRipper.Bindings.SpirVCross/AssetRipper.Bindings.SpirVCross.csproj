@@ -10,7 +10,7 @@
 		<IsAotCompatible>true</IsAotCompatible>
 		<CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
 
-		<VersionPrefix>1.1.0</VersionPrefix>
+		<VersionPrefix>1.1.1</VersionPrefix>
 		<Authors>ds5678</Authors>
 		<Copyright>Copyright (c) 2025 ds5678</Copyright>
 		<Company>AssetRipper</Company>
