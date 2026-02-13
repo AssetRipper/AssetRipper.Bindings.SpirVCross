@@ -6,7 +6,7 @@ namespace AssetRipper.Bindings.SpirVCross.Generator;
 
 public partial class BindingsGenerator
 {
-	private static void GenerateStructMethods(IncrementalGeneratorPostInitializationContext context, List<MethodData> methods, HashSet<GeneratedTypeData> generatedStructs)
+	private static void GenerateStructMethods(IncrementalGeneratorPostInitializationContext context, List<MethodData> methods, HashSet<GeneratedTypeData> generatedStructs, HashSet<GeneratedTypeData> wrapperStructs)
 	{
 		List<GeneratedTypeData> generatedStructList = generatedStructs.OrderByDescending(x => x.Name.Length).ToList();
 		Dictionary<GeneratedTypeData, List<MethodData>> generatedStructDictionary = generatedStructList.ToDictionary(t => t, t => new List<MethodData>());
@@ -80,6 +80,10 @@ public partial class BindingsGenerator
 					writer.WriteLine(')');
 					using (new CurlyBrackets(writer))
 					{
+						if (firstParameterIsStruct && wrapperStructs.Contains(generatedStruct))
+						{
+							writer.WriteLine("ThrowIfNull();");
+						}
 						if (!method.ReturnType.IsVoid)
 						{
 							writer.Write("return ");

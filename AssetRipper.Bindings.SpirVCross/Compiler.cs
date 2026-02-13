@@ -20,7 +20,6 @@ public unsafe readonly partial struct Compiler
 	{
 		get
 		{
-			ThrowIfNull();
 			EntryPoint* firstElement = null;
 			nuint count = 0;
 			GetEntryPoints(&firstElement, &count);
@@ -35,7 +34,6 @@ public unsafe readonly partial struct Compiler
 	{
 		get
 		{
-			ThrowIfNull();
 			ExecutionMode* firstElement = null;
 			nuint count = 0;
 			GetExecutionModes(&firstElement, &count);
@@ -52,7 +50,6 @@ public unsafe readonly partial struct Compiler
 		}
 		set
 		{
-			ThrowIfNull();
 			if (value)
 			{
 				SetExecutionMode(mode);

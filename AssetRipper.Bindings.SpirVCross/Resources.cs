@@ -25,7 +25,6 @@ public unsafe readonly partial struct Resources
 
 	public SpirVReflectedResourceList GetResourceListForType(ResourceType type)
 	{
-		ThrowIfNull();
 		ReflectedResource* firstElement = null;
 		nuint count = 0;
 		GetResourceListForType(type, &firstElement, &count);
@@ -34,7 +33,6 @@ public unsafe readonly partial struct Resources
 
 	public SpirVReflectedBuiltinResourceList GetBuiltinResourceListForType(BuiltinResourceType type)
 	{
-		ThrowIfNull();
 		ReflectedBuiltinResource* firstElement = null;
 		nuint count = 0;
 		GetBuiltinResourceListForType(type, &firstElement, &count);

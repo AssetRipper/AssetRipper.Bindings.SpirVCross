@@ -5,8 +5,9 @@ namespace AssetRipper.Bindings.SpirVCross.Generator;
 
 public partial class BindingsGenerator
 {
-	private static void GenerateWrapperTypes(IncrementalGeneratorPostInitializationContext context, List<(SilkNetTypeData, GeneratedTypeData)> opaqueTypes, HashSet<GeneratedTypeData> generatedStructs, Dictionary<TypeData, TypeData> replacements)
+	private static void GenerateWrapperTypes(IncrementalGeneratorPostInitializationContext context, List<(SilkNetTypeData, GeneratedTypeData)> opaqueTypes, HashSet<GeneratedTypeData> generatedStructs, Dictionary<TypeData, TypeData> replacements, out HashSet<GeneratedTypeData> wrapperStructs)
 	{
+		wrapperStructs = [];
 		foreach ((SilkNetTypeData silkNetType, GeneratedTypeData opaqueType) in opaqueTypes)
 		{
 			Debug.Assert(opaqueType.Name.StartsWith("Opaque", StringComparison.Ordinal));
@@ -25,6 +26,7 @@ public partial class BindingsGenerator
 			replacements.Add(new PointerTypeData(silkNetType), generatedType);
 			replacements.Add(new PointerTypeData(opaqueType), generatedType);
 			generatedStructs.Add(generatedType);
+			wrapperStructs.Add(generatedType);
 		}
 	}
 }

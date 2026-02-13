@@ -36,10 +36,10 @@ public partial class BindingsGenerator() : IncrementalGenerator(nameof(BindingsG
 			out List<(SilkNetTypeData, GeneratedTypeData)> opaqueTypes,
 			out Dictionary<TypeData, TypeData> replacements);
 		GeneratePInvokeMethods(context, methods, replacements);
-		GenerateWrapperTypes(context, opaqueTypes, generatedStructs, replacements);
+		GenerateWrapperTypes(context, opaqueTypes, generatedStructs, replacements, out HashSet<GeneratedTypeData> wrapperStructs);
 		GenerateStructFields(context, needsMembers, replacements);
 		GenerateNativeMethods(context, methods, replacements);
-		GenerateStructMethods(context, methods, generatedStructs);
+		GenerateStructMethods(context, methods, generatedStructs, wrapperStructs);
 		GenerateMainMethods(context, methods);
 	}
 
