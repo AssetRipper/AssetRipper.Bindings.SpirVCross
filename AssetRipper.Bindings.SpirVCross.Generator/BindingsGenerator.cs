@@ -14,8 +14,6 @@ public partial class BindingsGenerator() : IncrementalGenerator(nameof(BindingsG
 	private const string Namespace = "AssetRipper.Bindings.SpirVCross";
 	private const string ClassName = "SpirVCrossNative";
 
-	private static Type[] Types { get; } = [typeof(Cross), typeof(Spv)];
-
 	public override void OnInitialize(SgfInitializationContext context)
 	{
 		context.RegisterPostInitializationOutput(GenerateConstantsFile);
@@ -131,7 +129,7 @@ public partial class BindingsGenerator() : IncrementalGenerator(nameof(BindingsG
 		writer.WriteLine($"public static partial class {ClassName}");
 		using (new CurlyBrackets(writer))
 		{
-			foreach (Type type in Types)
+			foreach (Type type in (ReadOnlySpan<Type>)[typeof(Cross), typeof(Spv)])
 			{
 				CopyConstants(writer, type);
 			}
