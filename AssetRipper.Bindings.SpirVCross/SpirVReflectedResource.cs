@@ -2,11 +2,11 @@
 
 namespace AssetRipper.Bindings.SpirVCross;
 
-public readonly unsafe ref struct SpirVReflectedResource : INativeStruct<ReflectedResource>
+public readonly unsafe ref struct SpirVReflectedResource
 {
-	public SpirVContext Context => Compiler.Context;
+	public Context Context => Compiler.Context;
 
-	public SpirVCompiler Compiler { get; }
+	public Compiler Compiler { get; }
 
 	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public ReflectedResource* Pointer { get; }
@@ -24,7 +24,7 @@ public readonly unsafe ref struct SpirVReflectedResource : INativeStruct<Reflect
 
 	public string? VariableName
 	{
-		get => IsNull ? null : Compiler.GetName(Pointer->Id);
+		get => IsNull ? null : Compiler.GetNameS(Pointer->Id);
 		set
 		{
 			if (!IsNull && !string.IsNullOrEmpty(value))
@@ -34,21 +34,21 @@ public readonly unsafe ref struct SpirVReflectedResource : INativeStruct<Reflect
 		}
 	}
 
-	public SpirVType BaseType
+	public Type BaseType
 	{
 		get
 		{
 			ThrowIfNull();
-			return Compiler.GetType(Pointer->BaseTypeId);
+			return Compiler.GetTypeHandle(Pointer->BaseTypeId);
 		}
 	}
 
-	public readonly SpirVType Type
+	public readonly Type Type
 	{
 		get
 		{
 			ThrowIfNull();
-			return Compiler.GetType(Pointer->TypeId);
+			return Compiler.GetTypeHandle(Pointer->TypeId);
 		}
 	}
 
@@ -79,7 +79,7 @@ public readonly unsafe ref struct SpirVReflectedResource : INativeStruct<Reflect
 
 	public string? GetDecorationString(Decoration decoration)
 	{
-		return Compiler.GetDecorationString(VariableId, decoration);
+		return Compiler.GetDecorationStringS(VariableId, decoration);
 	}
 
 	public void SetDecorationString(Decoration decoration, string? value)
@@ -92,7 +92,7 @@ public readonly unsafe ref struct SpirVReflectedResource : INativeStruct<Reflect
 		Compiler.AddVertexAttributeRemap(Location, semantic);
 	}
 
-	internal SpirVReflectedResource(SpirVCompiler compiler, ReflectedResource* pointer)
+	internal SpirVReflectedResource(Compiler compiler, ReflectedResource* pointer)
 	{
 		Compiler = compiler;
 		Pointer = pointer;

@@ -18,22 +18,22 @@ internal static class Program
 		byte[] data = File.ReadAllBytes(path);
 		ReadOnlySpan<uint> words = MemoryMarshal.Cast<byte, uint>(data);
 		List<(string, string)> pendingRenames = [];
-		SpirVContext context = SpirVContext.Create();
+		Context context = Context.Create();
 		try
 		{
-			SpirVParsedIR ir = context.ParseSpirV(words);
+			ParsedIR ir = context.ParseSpirv(words);
 
-			SpirVCompiler compiler = context.CreateCompiler(Backend.Hlsl, ir, CaptureMode.TakeOwnership);
+			Compiler compiler = context.CreateCompiler(Backend.Hlsl, ir, CaptureMode.TakeOwnership);
 
-			SpirVCompilerOptions options = compiler.CreateOptions();
+			CompilerOptions options = compiler.CreateCompilerOptions();
 			options.SetOption(CompilerOption.HlslShaderModel, 40); // HLSL shader model 4.0, ie DX10
 			options.SetOption(CompilerOption.ForceTemporary, arguments.ForceTemporary);
 
-			compiler.InstallOptions(options);
+			compiler.InstallCompilerOptions(options);
 
 			compiler.BuildCombinedImageSamplers();
 
-			SpirVResources resources = compiler.CreateShaderResources();
+			Resources resources = compiler.CreateShaderResources();
 
 			SpirVReflectedResourceList uniformBufferList = resources.GetResourceListForType(ResourceType.UniformBuffer);
 			SpirVReflectedResourceList storageBuffer = resources.GetResourceListForType(ResourceType.StorageBuffer);
@@ -69,7 +69,7 @@ internal static class Program
 			if (uniformBufferList.Count == 1)
 			{
 				SpirVReflectedResource uniformBuffer = uniformBufferList[0];
-				SpirVType type = uniformBuffer.Type.BaseType;
+				Type type = uniformBuffer.Type.BaseType;
 
 				// If the type is unnamed, the compiler will be more cautious about member names.
 				// We want "{bufferName}_{memberName}", but the compiler might use something like "{bufferName}_1_{memberName}".
@@ -160,7 +160,7 @@ internal static class Program
 			string unnamedPrefix = arguments.UnnamedPrefix ?? compiler.ExecutionModel.ToLongName() + "_unnamed_";
 			for (int id = (int)compiler.CurrentIdBound - 1; id >= 0; id--)
 			{
-				string? name = compiler.GetName((uint)id);
+				string? name = compiler.GetNameS((uint)id);
 				if (string.IsNullOrEmpty(name))
 				{
 					compiler.SetName((uint)id, $"{unnamedPrefix}{id}");

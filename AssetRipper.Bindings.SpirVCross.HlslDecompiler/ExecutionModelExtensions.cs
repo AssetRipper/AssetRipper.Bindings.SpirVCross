@@ -1,6 +1,4 @@
-﻿using Silk.NET.SPIRV;
-
-namespace AssetRipper.Bindings.SpirVCross.HlslDecompiler;
+﻿namespace AssetRipper.Bindings.SpirVCross.HlslDecompiler;
 
 internal static class ExecutionModelExtensions
 {

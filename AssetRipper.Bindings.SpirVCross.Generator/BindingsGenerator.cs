@@ -1,9 +1,6 @@
-﻿using AssetRipper.Text.SourceGeneration;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using SGF;
-using Silk.NET.SPIRV;
 using Silk.NET.SPIRV.Cross;
-using System.CodeDom.Compiler;
 using System.Reflection;
 
 namespace AssetRipper.Bindings.SpirVCross.Generator;
@@ -16,118 +13,66 @@ public partial class BindingsGenerator() : IncrementalGenerator(nameof(BindingsG
 	private const string ClassName = "SpirVCrossNative";
 	private const string PInvokeClassName = "PInvoke";
 	private const string PInvokeGlobalName = $"global::{LowLevelNamespace}.{PInvokeClassName}";
+	private const string NativeMethodsClassName = "NativeMethods";
+	private const string NativeMethodsGlobalName = $"global::{LowLevelNamespace}.{NativeMethodsClassName}";
+
+	private static Dictionary<string, MethodData> ManuallyImplementedNativeMethods { get; } = GetManuallyImplementedNativeMethods().ToDictionary(m => m.Name);
 
 	public override void OnInitialize(SgfInitializationContext context)
 	{
-		context.RegisterPostInitializationOutput(GenerateConstantsFile);
-		context.RegisterPostInitializationOutput(GenerateMethodsFile);
-		context.RegisterPostInitializationOutput(GeneratePInvokeMethodsFile);
+		context.RegisterPostInitializationOutput(Generate);
 	}
 
-	private static void GenerateMethodsFile(IncrementalGeneratorPostInitializationContext context)
+	private static void Generate(IncrementalGeneratorPostInitializationContext context)
 	{
-		using StringWriter stringWriter = new() { NewLine = "\n" };
-		using IndentedTextWriter writer = IndentedTextWriterFactory.Create(stringWriter);
-
-		writer.WriteGeneratedCodeWarning();
-		writer.WriteLineNoTabs();
-		writer.WriteFileScopedNamespace(Namespace);
-		writer.WriteLineNoTabs();
-		writer.WriteLine($"public static unsafe partial class {ClassName}");
-		using (new CurlyBrackets(writer))
-		{
-			foreach (MethodInfo method in GetAllMethods(typeof(Cross)).OrderBy(m => m.Name))
-			{
-				writer.WriteComment(method.Name);
-				writer.Write($"public static {ToFullName(method.ReturnType)} {method.Name}(");
-				ParameterInfo[] parameters = method.GetParameters();
-				for (int i = 0; i < parameters.Length; i++)
-				{
-					ParameterInfo parameter = parameters[i];
-					writer.Write(ToFullName(parameter.ParameterType));
-					writer.Write($" {parameter.Name}");
-					if (i < parameters.Length - 1)
-					{
-						writer.Write(", ");
-					}
-				}
-				writer.WriteLine(')');
-				using (new CurlyBrackets(writer))
-				{
-					if (method.ReturnType != typeof(void))
-					{
-						writer.Write("return ");
-					}
-					writer.Write($"{PInvokeGlobalName}.{method.Name}(");
-					for (int i = 0; i < parameters.Length; i++)
-					{
-						ParameterInfo parameter = parameters[i];
-						writer.Write($"{parameter.Name}");
-						if (i < parameters.Length - 1)
-						{
-							writer.Write(", ");
-						}
-					}
-					writer.WriteLine(");");
-				}
-				writer.WriteLineNoTabs();
-			}
-		}
-
-		context.AddSource($"{ClassName}.Methods.cs", stringWriter.ToString());
+		List<MethodData> methods = GetAllMethods(typeof(Cross)).Select(MethodData.FromRuntimeMethod).ToList();
+		methods.Sort();
+		GenerateConstants(context);
+		GenerateTypes(
+			context,
+			methods,
+			out HashSet<GeneratedTypeData> generatedStructs,
+			out List<(SilkNetTypeData, GeneratedTypeData)> needsMembers,
+			out List<(SilkNetTypeData, GeneratedTypeData)> opaqueTypes,
+			out Dictionary<TypeData, TypeData> replacements);
+		GeneratePInvokeMethods(context, methods, replacements);
+		GenerateWrapperTypes(context, opaqueTypes, generatedStructs, replacements);
+		GenerateStructFields(context, needsMembers, replacements);
+		GenerateNativeMethods(context, methods, replacements);
+		GenerateStructMethods(context, methods, generatedStructs);
+		GenerateMainMethods(context, methods);
 	}
 
-	private static void GeneratePInvokeMethodsFile(IncrementalGeneratorPostInitializationContext context)
+	private static MethodData[] GetManuallyImplementedNativeMethods()
 	{
-		using StringWriter stringWriter = new() { NewLine = "\n" };
-		using IndentedTextWriter writer = IndentedTextWriterFactory.Create(stringWriter);
+		// Wrapper structs
+		GeneratedTypeData compiler = new(Namespace, "Compiler");
+		GeneratedTypeData compilerOptions = new(Namespace, "CompilerOptions");
+		GeneratedTypeData constant = new(Namespace, "Constant");
+		GeneratedTypeData context = new(Namespace, "Context");
+		GeneratedTypeData parsedIr = new(Namespace, "ParsedIR");
+		GeneratedTypeData resources = new(Namespace, "Resources");
+		GeneratedTypeData set = new(Namespace, "Set");
+		GeneratedTypeData type = new(Namespace, "Type");
 
-		writer.WriteGeneratedCodeWarning();
-		writer.WriteLineNoTabs();
-		writer.WriteFileScopedNamespace(LowLevelNamespace);
-		writer.WriteLineNoTabs();
-		writer.WriteLine($"public static unsafe partial class {PInvokeClassName}");
-		using (new CurlyBrackets(writer))
-		{
-			foreach (MethodInfo method in GetAllMethods(typeof(Cross)).OrderBy(m => m.Name))
-			{
-				writer.WriteComment(method.Name);
-				writer.Write($"public static {ToFullName(method.ReturnType)} {method.Name}(");
-				ParameterInfo[] parameters = method.GetParameters();
-				for (int i = 0; i < parameters.Length; i++)
-				{
-					ParameterInfo parameter = parameters[i];
-					writer.Write(ToFullName(parameter.ParameterType));
-					writer.Write($" {parameter.Name}");
-					if (i < parameters.Length - 1)
-					{
-						writer.Write(", ");
-					}
-				}
-				writer.WriteLine(')');
-				using (new CurlyBrackets(writer))
-				{
-					if (method.ReturnType != typeof(void))
-					{
-						writer.Write("return ");
-					}
-					writer.Write($"{PInvokeGlobalName}.ApiInstance.{method.Name}(");
-					for (int i = 0; i < parameters.Length; i++)
-					{
-						ParameterInfo parameter = parameters[i];
-						writer.Write($"{parameter.Name}");
-						if (i < parameters.Length - 1)
-						{
-							writer.Write(", ");
-						}
-					}
-					writer.WriteLine(");");
-				}
-				writer.WriteLineNoTabs();
-			}
-		}
+		// Other
+		GeneratedTypeData backend = new(Namespace, "Backend");
+		GeneratedTypeData captureMode = new(Namespace, "CaptureMode");
+		PrimitiveTypeData uint32 = new(typeof(uint));
+		PrimitiveTypeData uintPtr = new(typeof(nuint));
 
-		context.AddSource($"{PInvokeClassName}.Methods.cs", stringWriter.ToString());
+		return
+		[
+			new(compilerOptions, "CompilerCreateCompilerOptions", [new(compiler, "compiler")]),
+			new(resources, "CompilerCreateShaderResources", [new(compiler, "compiler")]),
+			new(resources, "CompilerCreateShaderResourcesForActiveVariables", [new(compiler, "compiler"), new(set, "active")]),
+			new(set, "CompilerGetActiveInterfaceVariables", [new(compiler, "compiler")]),
+			new(constant, "CompilerGetConstantHandle", [new(compiler, "compiler"), new(uint32, "id")]),
+			new(type, "CompilerGetTypeHandle", [new(compiler, "compiler"), new(uint32, "id")]),
+			new(context, "ContextCreate", []),
+			new(compiler, "ContextCreateCompiler", [new(context, "context"), new(backend, "backend"), new(parsedIr, "parsed_ir"), new(captureMode, "mode")]),
+			new(parsedIr, "ContextParseSpirv", [new(context, "context"), new(new PointerTypeData(uint32), "spirv"), new(uintPtr, "word_count")]),
+		];
 	}
 
 	private static IEnumerable<MethodInfo> GetAllMethods(Type type)
@@ -139,6 +84,11 @@ public partial class BindingsGenerator() : IncrementalGenerator(nameof(BindingsG
 				continue;
 			}
 
+			if (method.Name is "ContextSetErrorCallback")
+			{
+				continue; // Skip the only method with a function pointer
+			}
+
 			ParameterInfo[] parameters = method.GetParameters();
 			if (parameters.Any(p => p.ParameterType.IsByRef))
 			{
@@ -148,50 +98,5 @@ public partial class BindingsGenerator() : IncrementalGenerator(nameof(BindingsG
 
 			yield return method;
 		}
-	}
-
-	private static void GenerateConstantsFile(IncrementalGeneratorPostInitializationContext context)
-	{
-		using StringWriter stringWriter = new() { NewLine = "\n" };
-		using IndentedTextWriter writer = IndentedTextWriterFactory.Create(stringWriter);
-
-		writer.WriteGeneratedCodeWarning();
-		writer.WriteLineNoTabs();
-		writer.WriteFileScopedNamespace(Namespace);
-		writer.WriteLineNoTabs();
-		writer.WriteLine($"public static partial class {ClassName}");
-		using (new CurlyBrackets(writer))
-		{
-			foreach (Type type in (ReadOnlySpan<Type>)[typeof(Cross), typeof(Spv)])
-			{
-				CopyConstants(writer, type);
-			}
-		}
-
-		context.AddSource($"{ClassName}.Constants.cs", stringWriter.ToString());
-	}
-
-	private static void CopyConstants(IndentedTextWriter writer, Type type)
-	{
-		foreach (FieldInfo field in type.GetFields())
-		{
-			if (field.IsLiteral)
-			{
-				writer.WriteLine($"public const global::{field.FieldType.FullName} {field.Name} = global::{type.FullName}.{field.Name};");
-			}
-		}
-	}
-
-	private static string ToFullName(Type type)
-	{
-		if (type == typeof(void))
-		{
-			return "void";
-		}
-		if (type == typeof(void*))
-		{
-			return "void*";
-		}
-		return $"global::{type.FullName}";
 	}
 }

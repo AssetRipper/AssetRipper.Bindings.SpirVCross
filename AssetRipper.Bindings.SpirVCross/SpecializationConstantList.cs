@@ -2,10 +2,10 @@
 
 public readonly unsafe ref struct SpecializationConstantList
 {
-	public SpirVCompiler Compiler { get; }
+	public Compiler Compiler { get; }
 	private ReadOnlySpan<SpecializationConstant> Span { get; }
 
-	internal SpecializationConstantList(SpirVCompiler compiler, SpecializationConstant* firstElement, nuint count)
+	internal SpecializationConstantList(Compiler compiler, SpecializationConstant* firstElement, nuint count)
 	{
 		Compiler = compiler;
 		Span = new ReadOnlySpan<SpecializationConstant>(firstElement, (int)count);

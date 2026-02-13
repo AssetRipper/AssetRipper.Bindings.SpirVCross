@@ -6,8 +6,8 @@ namespace AssetRipper.Bindings.SpirVCross;
 [DebuggerDisplay($"{{{nameof(GetDebuggerDisplay)}(),nq}}")]
 public readonly unsafe ref struct SpirVReflectedResourceList
 {
-	public SpirVContext Context => Compiler.Context;
-	public SpirVCompiler Compiler { get; }
+	public Context Context => Compiler.Context;
+	public Compiler Compiler { get; }
 	private ReadOnlySpan<ReflectedResource> Span { get; }
 	public int Count => Span.Length;
 	public readonly SpirVReflectedResource this[int index]
@@ -20,7 +20,7 @@ public readonly unsafe ref struct SpirVReflectedResourceList
 			}
 		}
 	}
-	public SpirVReflectedResourceList(SpirVCompiler compiler, ReadOnlySpan<ReflectedResource> span)
+	public SpirVReflectedResourceList(Compiler compiler, ReadOnlySpan<ReflectedResource> span)
 	{
 		Compiler = compiler;
 		Span = span;
@@ -47,19 +47,16 @@ public readonly unsafe ref struct SpirVReflectedResourceList
 		public class SpirVReflectedResourceDebugView
 		{
 			[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-			private Context* context;
-			[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-			private Compiler* compiler;
+			private Compiler compiler;
 			[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 			private ReflectedResource* resource;
 
 			[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-			public SpirVReflectedResource Proxy => new SpirVReflectedResource(new SpirVCompiler(new SpirVContext(context), compiler), resource);
+			public SpirVReflectedResource Proxy => new SpirVReflectedResource(compiler, resource);
 
 			public SpirVReflectedResourceDebugView(SpirVReflectedResource resource)
 			{
-				context = resource.Context.Pointer;
-				compiler = resource.Compiler.Pointer;
+				compiler = resource.Compiler;
 				this.resource = resource.Pointer;
 			}
 

@@ -2,11 +2,11 @@
 
 namespace AssetRipper.Bindings.SpirVCross;
 
-public readonly unsafe ref struct SpirVReflectedBuiltinResource : INativeStruct<ReflectedBuiltinResource>
+public readonly unsafe ref struct SpirVReflectedBuiltinResource
 {
-	public SpirVContext Context => Compiler.Context;
+	public Context Context => Compiler.Context;
 
-	public SpirVCompiler Compiler { get; }
+	public Compiler Compiler { get; }
 
 	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public ReflectedBuiltinResource* Pointer { get; }
@@ -22,12 +22,12 @@ public readonly unsafe ref struct SpirVReflectedBuiltinResource : INativeStruct<
 		}
 	}
 
-	public SpirVType ValueType
+	public Type ValueType
 	{
 		get
 		{
 			ThrowIfNull();
-			return Compiler.GetType(Pointer->ValueTypeId);
+			return Compiler.GetTypeHandle(Pointer->ValueTypeId);
 		}
 	}
 
@@ -40,7 +40,7 @@ public readonly unsafe ref struct SpirVReflectedBuiltinResource : INativeStruct<
 		}
 	}
 
-	internal SpirVReflectedBuiltinResource(SpirVCompiler compiler, ReflectedBuiltinResource* pointer)
+	internal SpirVReflectedBuiltinResource(Compiler compiler, ReflectedBuiltinResource* pointer)
 	{
 		Compiler = compiler;
 		Pointer = pointer;

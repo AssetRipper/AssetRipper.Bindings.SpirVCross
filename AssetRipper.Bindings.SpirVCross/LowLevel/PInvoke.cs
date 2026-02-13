@@ -1,4 +1,6 @@
-﻿namespace AssetRipper.Bindings.SpirVCross.LowLevel;
+﻿using Silk.NET.SPIRV.Cross;
+
+namespace AssetRipper.Bindings.SpirVCross.LowLevel;
 
 public static partial class PInvoke
 {
