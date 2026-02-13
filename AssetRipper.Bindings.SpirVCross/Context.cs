@@ -3,11 +3,13 @@ using System.Diagnostics;
 
 namespace AssetRipper.Bindings.SpirVCross;
 
-public unsafe readonly partial struct Context
+public unsafe readonly partial struct Context : IDisposable
 {
 	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public OpaqueContext* Handle { get; }
 	public bool IsNull => Handle is null;
+	public string? LastErrorString => IsNull ? null : GetLastErrorStringS();
+
 	public Context(OpaqueContext* pointer)
 	{
 		Handle = pointer;
@@ -34,18 +36,11 @@ public unsafe readonly partial struct Context
 		return CreateCompiler(target, ir, CaptureMode.TakeOwnership);
 	}
 
-	public string? LastErrorString
+	public void Dispose()
 	{
-		get
+		if (!IsNull)
 		{
-			if (IsNull)
-			{
-				return null;
-			}
-			else
-			{
-				return GetLastErrorStringS();
-			}
+			Destroy();
 		}
 	}
 }
