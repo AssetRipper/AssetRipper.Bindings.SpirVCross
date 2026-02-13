@@ -40,7 +40,7 @@ public partial class BindingsGenerator() : IncrementalGenerator(nameof(BindingsG
 
 	private static void CopyMethods(IndentedTextWriter writer, Type type)
 	{
-		foreach (MethodInfo method in type.GetMethods(BindingFlags.Public | BindingFlags.Instance))
+		foreach (MethodInfo method in GetAllMethods(type).OrderBy(m => m.Name))
 		{
 			if (method.IsSpecialName || method.DeclaringType != type || method.IsGenericMethod)
 			{
@@ -86,6 +86,26 @@ public partial class BindingsGenerator() : IncrementalGenerator(nameof(BindingsG
 				writer.WriteLine(");");
 			}
 			writer.WriteLineNoTabs();
+		}
+	}
+
+	private static IEnumerable<MethodInfo> GetAllMethods(Type type)
+	{
+		foreach (MethodInfo method in type.GetMethods(BindingFlags.Public | BindingFlags.Instance))
+		{
+			if (method.IsSpecialName || method.DeclaringType != type || method.IsGenericMethod)
+			{
+				continue;
+			}
+
+			ParameterInfo[] parameters = method.GetParameters();
+			if (parameters.Any(p => p.ParameterType.IsByRef))
+			{
+				// Silk.NET generates a combinatoral explosion of overloads for ref parameters.
+				continue;
+			}
+
+			yield return method;
 		}
 	}
 
