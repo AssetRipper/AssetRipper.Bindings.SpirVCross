@@ -32,6 +32,10 @@ public partial class BindingsGenerator
 				{
 					replacedMethod = new MethodData(new PrimitiveTypeData(typeof(void)), replacedMethod.Name, replacedMethod.Parameters);
 				}
+				else if (ShouldReturnBoolean(method))
+				{
+					replacedMethod = new MethodData(new PrimitiveTypeData(typeof(bool)), replacedMethod.Name, replacedMethod.Parameters);
+				}
 				methods[methodIndex] = replacedMethod; // Update the method in-place
 
 				writer.Write($"public static {replacedMethod.ReturnType.FullName} {replacedMethod.Name}(");
@@ -42,7 +46,14 @@ public partial class BindingsGenerator
 					if (!replacedMethod.ReturnType.IsVoid)
 					{
 						writer.Write("return ");
-						if (method.ReturnType != replacedMethod.ReturnType)
+						if (method.ReturnType == replacedMethod.ReturnType)
+						{
+						}
+						else if (method.ReturnType is PrimitiveTypeData { IsByte: true } && replacedMethod.ReturnType is PrimitiveTypeData { IsBoolean: true })
+						{
+							writer.Write("0 != ");
+						}
+						else
 						{
 							throw new Exception("This shouldn't happen. We manually implement any methods that return a wrapper type.");
 						}
@@ -85,5 +96,27 @@ public partial class BindingsGenerator
 		}
 
 		context.AddSource($"{NativeMethodsClassName}.Methods.cs", stringWriter.ToString());
+
+		static bool ShouldReturnBoolean(MethodData method)
+		{
+			if (method.ReturnType is not PrimitiveTypeData { IsByte: true })
+			{
+				return false;
+			}
+
+			int hasIndex = method.Name.IndexOf("Has", StringComparison.Ordinal);
+			if (hasIndex >= 0)
+			{
+				return method.Name.Length > hasIndex + 3 && char.IsUpper(method.Name[hasIndex + 3]);
+			}
+
+			int isIndex = method.Name.IndexOf("Is", StringComparison.Ordinal);
+			if (isIndex >= 0)
+			{
+				return method.Name.Length > isIndex + 2 && char.IsUpper(method.Name[isIndex + 2]);
+			}
+
+			return false;
+		}
 	}
 }

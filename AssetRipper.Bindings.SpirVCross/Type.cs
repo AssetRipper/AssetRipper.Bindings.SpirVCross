@@ -135,7 +135,7 @@ public unsafe readonly partial struct Type
 	{
 		get
 		{
-			return IsNull ? default : GetImageIsDepth() != 0;
+			return IsNull ? default : GetImageIsDepth();
 		}
 	}
 	public bool ImageArrayed
@@ -156,7 +156,7 @@ public unsafe readonly partial struct Type
 	{
 		get
 		{
-			return IsNull ? default : GetImageIsStorage() != 0;
+			return IsNull ? default : GetImageIsStorage();
 		}
 	}
 	public ImageFormat ImageStorageFormat
