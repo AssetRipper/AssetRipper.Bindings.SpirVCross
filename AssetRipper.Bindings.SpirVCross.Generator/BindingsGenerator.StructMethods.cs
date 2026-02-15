@@ -46,6 +46,10 @@ public partial class BindingsGenerator
 				{
 					MethodData method = methodsForStruct[methodIndex];
 					string name = method.Name[generatedStruct.Name.Length..];
+					if (name == nameof(GetType))
+					{
+						name = "GetTypeId";
+					}
 
 					bool firstParameterIsStruct = method.Parameters.Count > 0 && method.Parameters[0].Type == generatedStruct;
 					bool firstParameterIsStructPointer = !firstParameterIsStruct && method.Parameters.Count > 0 && method.Parameters[0].Type == new PointerTypeData(generatedStruct);

@@ -16,7 +16,7 @@ public unsafe readonly partial struct Constant
 	{
 		get
 		{
-			return IsNull ? default : Compiler.GetTypeHandle(GetType());
+			return IsNull ? default : Compiler.GetTypeHandle(GetTypeId());
 		}
 	}
 	public Constant(OpaqueConstant* pointer, Compiler compiler, uint id)
