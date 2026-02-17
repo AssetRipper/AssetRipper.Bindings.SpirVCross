@@ -10,6 +10,8 @@ public readonly struct TypeMember
 	public Compiler Compiler { get; }
 	public bool IsNull => Compiler.IsNull;
 
+	public uint ArrayStride => IsNull ? default : Compiler.TypeStructMemberArrayStride(DeclaringType, Index);
+
 	public Type DeclaringType => IsNull ? default : Compiler.GetTypeHandle(DeclaringTypeId);
 
 	public IEnumerable<Decoration> Decorations
@@ -30,6 +32,8 @@ public readonly struct TypeMember
 		}
 	}
 
+	public uint MatrixStride => IsNull ? default : Compiler.TypeStructMemberMatrixStride(DeclaringType, Index);
+
 	public uint MemberTypeId => IsNull ? default : DeclaringType.GetMemberType(Index);
 
 	public Type MemberType => IsNull ? default : Compiler.GetTypeHandle(MemberTypeId);
@@ -45,6 +49,8 @@ public readonly struct TypeMember
 			}
 		}
 	}
+
+	public uint Offset => IsNull ? default : Compiler.TypeStructMemberOffset(DeclaringType, Index);
 
 	public nuint Size
 	{

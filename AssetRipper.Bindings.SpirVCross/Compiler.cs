@@ -130,4 +130,25 @@ public unsafe readonly partial struct Compiler
 		GetDeclaredStructMemberSize(type, index, &size);
 		return size;
 	}
+
+	public uint TypeStructMemberArrayStride(Type type, uint index)
+	{
+		uint stride = 0;
+		TypeStructMemberArrayStride(type, index, &stride);
+		return stride;
+	}
+
+	public uint TypeStructMemberMatrixStride(Type type, uint index)
+	{
+		uint stride = 0;
+		TypeStructMemberMatrixStride(type, index, &stride);
+		return stride;
+	}
+
+	public uint TypeStructMemberOffset(Type type, uint index)
+	{
+		uint stride = 0;
+		TypeStructMemberOffset(type, index, &stride);
+		return stride;
+	}
 }
