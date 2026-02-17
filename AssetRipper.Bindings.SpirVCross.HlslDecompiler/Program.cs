@@ -79,7 +79,7 @@ internal static class Program
 					&& type.NumMemberTypes == arguments.UniformBufferNames.Length)
 				{
 					string bufferName = RandomName('b');
-					uniformBuffer.VariableName = bufferName;
+					uniformBuffer.Name = bufferName;
 
 					for (int i = 0; i < arguments.UniformBufferNames.Length; i++)
 					{
@@ -98,9 +98,14 @@ internal static class Program
 				for (int i = 0; i < stageInput.Count; i++)
 				{
 					SpirVReflectedResource input = stageInput[i];
+					uint? location = input.Location;
+					if (location == null)
+					{
+						continue;
+					}
 					string inputName = RandomName('i');
-					string realName = arguments.InputNames[input.Location];
-					input.VariableName = inputName;
+					string realName = arguments.InputNames[location.Value];
+					input.Name = inputName;
 					pendingRenames.Add((inputName, realName));
 				}
 			}
@@ -110,9 +115,14 @@ internal static class Program
 				for (int i = 0; i < stageInput.Count; i++)
 				{
 					SpirVReflectedResource input = stageInput[i];
+					uint? location = input.Location;
+					if (location == null)
+					{
+						continue;
+					}
 					string inputName = RandomName('i');
 					string realName = $"{prefix}{input.Location}";
-					input.VariableName = inputName;
+					input.Name = inputName;
 					pendingRenames.Add((inputName, realName));
 				}
 			}
@@ -123,9 +133,14 @@ internal static class Program
 				for (int i = 0; i < stageOutput.Count; i++)
 				{
 					SpirVReflectedResource output = stageOutput[i];
+					uint? location = output.Location;
+					if (location == null)
+					{
+						continue;
+					}
 					string outputName = RandomName('o');
-					string realName = arguments.OutputNames[output.Location];
-					output.VariableName = outputName;
+					string realName = arguments.OutputNames[location.Value];
+					output.Name = outputName;
 					pendingRenames.Add((outputName, realName));
 				}
 			}
@@ -137,7 +152,7 @@ internal static class Program
 					SpirVReflectedResource output = stageOutput[i];
 					string outputName = RandomName('o');
 					string realName = $"{prefix}{i}";
-					output.VariableName = outputName;
+					output.Name = outputName;
 					pendingRenames.Add((outputName, realName));
 				}
 			}
@@ -150,7 +165,7 @@ internal static class Program
 					SpirVReflectedResource sampler = sampleImage[i];
 					string samplerName = RandomName('s');
 					string realName = arguments.SamplerNames[i];
-					sampler.VariableName = samplerName;
+					sampler.Name = samplerName;
 					// https://docs.unity3d.com/Manual/SL-SamplerStates.html
 					pendingRenames.Add(($"_{samplerName}_sampler", $"sampler{realName}"));
 					pendingRenames.Add((samplerName, realName));

@@ -13,89 +13,39 @@ public readonly unsafe ref struct SpirVReflectedResource
 
 	public bool IsNull => Pointer == null;
 
-	public uint VariableId
-	{
-		get
-		{
-			ThrowIfNull();
-			return Pointer->Id;
-		}
-	}
+	public Type BaseType => IsNull ? default : Compiler.GetTypeHandle(Pointer->BaseTypeId);
 
-	public string? VariableName
-	{
-		get => IsNull ? null : Compiler.GetNameS(Pointer->Id);
-		set
-		{
-			if (!IsNull && !string.IsNullOrEmpty(value))
-			{
-				Compiler.SetName(Pointer->Id, value);
-			}
-		}
-	}
+	public uint BaseTypeId => IsNull ? default : Pointer->BaseTypeId;
 
-	public Type BaseType
-	{
-		get
-		{
-			ThrowIfNull();
-			return Compiler.GetTypeHandle(Pointer->BaseTypeId);
-		}
-	}
+	public uint? Binding => IsNull ? null : AsDecoratedObject().GetDecorationOrNull(Decoration.Binding);
 
-	public readonly Type Type
-	{
-		get
-		{
-			ThrowIfNull();
-			return Compiler.GetTypeHandle(Pointer->TypeId);
-		}
-	}
+	public IEnumerable<Decoration> Decorations => AsDecoratedObject().Decorations;
+
+	public uint Id => IsNull ? default : Pointer->Id;
+
+	public uint? Location => AsDecoratedObject().GetDecorationOrNull(Decoration.Location);
 
 	public string? Name
 	{
-		get
-		{
-			ThrowIfNull();
-			return NativeString.ToString(Pointer->Name);
-		}
+		get => AsDecoratedObject().Name;
+		set => AsDecoratedObject().Name = value;
 	}
 
-	public uint Location
-	{
-		get => GetDecoration(Decoration.Location);
-		set => SetDecoration(Decoration.Location, value);
-	}
+	public readonly Type Type => IsNull ? default : Compiler.GetTypeHandle(Pointer->TypeId);
 
-	public uint GetDecoration(Decoration decoration)
-	{
-		return Compiler.GetDecoration(VariableId, decoration);
-	}
-
-	public void SetDecoration(Decoration decoration, uint value)
-	{
-		Compiler.SetDecoration(VariableId, decoration, value);
-	}
-
-	public string? GetDecorationString(Decoration decoration)
-	{
-		return Compiler.GetDecorationStringS(VariableId, decoration);
-	}
-
-	public void SetDecorationString(Decoration decoration, string? value)
-	{
-		Compiler.SetDecorationString(VariableId, decoration, value);
-	}
-
-	public void SetSemantic(string semantic)
-	{
-		Compiler.AddVertexAttributeRemap(Location, semantic);
-	}
+	public uint TypeId => IsNull ? default : Pointer->TypeId;
 
 	internal SpirVReflectedResource(Compiler compiler, ReflectedResource* pointer)
 	{
 		Compiler = compiler;
 		Pointer = pointer;
+	}
+
+	public DecoratedObject AsDecoratedObject() => IsNull ? default : new DecoratedObject(Pointer->Id, Compiler);
+
+	public void SetSemantic(string semantic)
+	{
+		Compiler.AddVertexAttributeRemap(Location ?? throw new InvalidOperationException("Resource is not decorated with a location"), semantic);
 	}
 
 	private void ThrowIfNull()
