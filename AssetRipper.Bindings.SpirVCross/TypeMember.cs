@@ -12,6 +12,24 @@ public readonly struct TypeMember
 
 	public Type DeclaringType => IsNull ? default : Compiler.GetTypeHandle(DeclaringTypeId);
 
+	public IEnumerable<Decoration> Decorations
+	{
+		get
+		{
+			if (IsNull)
+			{
+				yield break;
+			}
+			foreach (Decoration decoration in Enum.GetValues<Decoration>())
+			{
+				if (HasDecoration(decoration))
+				{
+					yield return decoration;
+				}
+			}
+		}
+	}
+
 	public uint MemberTypeId => IsNull ? default : DeclaringType.GetMemberType(Index);
 
 	public Type MemberType => IsNull ? default : Compiler.GetTypeHandle(MemberTypeId);
@@ -48,6 +66,50 @@ public readonly struct TypeMember
 		DeclaringTypeId = declaringTypeId;
 		Index = index;
 		Compiler = compiler;
+	}
+
+	public uint GetDecoration(Decoration decoration)
+	{
+		return IsNull ? default : Compiler.GetMemberDecoration(DeclaringTypeId, Index, decoration);
+	}
+
+	public uint? GetDecorationOrNull(Decoration decoration)
+	{
+		return HasDecoration(decoration) ? GetDecoration(decoration) : null;
+	}
+
+	public string? GetDecorationString(Decoration decoration)
+	{
+		return IsNull ? null : Compiler.GetMemberDecorationStringS(DeclaringTypeId, Index, decoration);
+	}
+
+	public bool HasDecoration(Decoration decoration)
+	{
+		return !IsNull && Compiler.HasMemberDecoration(DeclaringTypeId, Index, decoration);
+	}
+
+	public void SetDecoration(Decoration decoration, uint value)
+	{
+		if (!IsNull)
+		{
+			Compiler.SetMemberDecoration(DeclaringTypeId, Index, decoration, value);
+		}
+	}
+
+	public void SetDecorationString(Decoration decoration, string value)
+	{
+		if (!IsNull)
+		{
+			Compiler.SetMemberDecorationString(DeclaringTypeId, Index, decoration, value);
+		}
+	}
+
+	public void UnsetDecoration(Decoration decoration)
+	{
+		if (!IsNull)
+		{
+			Compiler.UnsetMemberDecoration(DeclaringTypeId, Index, decoration);
+		}
 	}
 
 	private string GetDebuggerDisplay()
