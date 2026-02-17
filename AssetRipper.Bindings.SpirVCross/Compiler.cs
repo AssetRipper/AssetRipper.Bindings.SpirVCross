@@ -117,15 +117,17 @@ public unsafe readonly partial struct Compiler
 		return NativeString.ToString(output);
 	}
 
-	public Type GetMemberType(uint id, uint index)
-	{
-		return GetTypeHandle(id).GetMemberTypeHandle(index);
-	}
-
-	internal nuint GetDeclaredStructSize(Type type)
+	public nuint GetDeclaredStructSize(Type type)
 	{
 		nuint size = 0;
 		GetDeclaredStructSize(type, &size);
+		return size;
+	}
+
+	public nuint GetDeclaredStructMemberSize(Type type, uint index)
+	{
+		nuint size = 0;
+		GetDeclaredStructMemberSize(type, index, &size);
 		return size;
 	}
 }

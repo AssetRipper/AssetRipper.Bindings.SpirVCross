@@ -93,7 +93,7 @@ public unsafe readonly partial struct Type
 			return IsNull ? 0 : GetNumMemberTypes();
 		}
 	}
-	public string?[] MemberNames
+	public TypeMember[] Members
 	{
 		get
 		{
@@ -102,12 +102,12 @@ public unsafe readonly partial struct Type
 			{
 				return [];
 			}
-			string?[] names = new string?[numMemberTypes];
+			TypeMember[] members = new TypeMember[numMemberTypes];
 			for (uint i = 0; i < numMemberTypes; i++)
 			{
-				names[i] = GetMemberName(i);
+				members[i] = new TypeMember(Id, i, Compiler);
 			}
-			return names;
+			return members;
 		}
 	}
 	public StorageClass StorageClass
@@ -173,34 +173,23 @@ public unsafe readonly partial struct Type
 			return IsNull ? default : GetImageAccessQualifier();
 		}
 	}
-	public nuint DeclaredStructSize
+	public nuint Size
 	{
 		get
 		{
 			return IsNull ? 0 : Compiler.GetDeclaredStructSize(this);
 		}
 	}
-
-	public string? GetMemberName(uint i)
-	{
-		return Compiler.GetMemberNameS(Id, i);
-	}
-
-	public void SetMemberName(uint i, string name)
-	{
-		Compiler.SetMemberName(Id, i, name);
-	}
-
-	public Type GetMemberTypeHandle(uint index)
-	{
-		return Compiler.GetTypeHandle(GetMemberType(index));
-	}
-
 	internal Type(OpaqueType* pointer, Compiler compiler, uint id)
 	{
 		Handle = pointer;
 		Compiler = compiler;
 		Id = id;
+	}
+	public TypeMember GetMember(uint i)
+	{
+		ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(i, NumMemberTypes);
+		return new TypeMember(Id, i, Compiler);
 	}
 	public void ThrowIfNull()
 	{

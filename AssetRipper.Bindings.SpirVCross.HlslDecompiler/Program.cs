@@ -85,7 +85,7 @@ internal static class Program
 					{
 						string memberName = RandomName('m');
 						string realName = arguments.UniformBufferNames[i];
-						type.SetMemberName((uint)i, memberName);
+						type.GetMember((uint)i).Name = memberName;
 
 						pendingRenames.Add(($"{bufferName}_{memberName}", realName));
 					}
