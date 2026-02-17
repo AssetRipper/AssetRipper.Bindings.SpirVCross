@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AssetRipper.Bindings.SpirVCross;
 
@@ -25,6 +26,7 @@ public readonly unsafe ref struct SpirVReflectedResource
 
 	public uint? Location => AsDecoratedObject().GetDecorationOrNull(Decoration.Location);
 
+	[DisallowNull]
 	public string? Name
 	{
 		get => AsDecoratedObject().Name;

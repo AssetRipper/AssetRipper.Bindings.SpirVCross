@@ -1,4 +1,6 @@
-﻿namespace AssetRipper.Bindings.SpirVCross;
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace AssetRipper.Bindings.SpirVCross;
 
 public readonly struct DecoratedObject
 {
@@ -25,6 +27,7 @@ public readonly struct DecoratedObject
 		}
 	}
 
+	[DisallowNull]
 	public string? Name
 	{
 		get => IsNull ? null : Compiler.GetNameS(Id);
@@ -73,7 +76,7 @@ public readonly struct DecoratedObject
 		return Compiler.GetDecorationStringS(Id, decoration);
 	}
 
-	public void SetDecorationString(Decoration decoration, string? value)
+	public void SetDecorationString(Decoration decoration, string value)
 	{
 		Compiler.SetDecorationString(Id, decoration, value);
 	}

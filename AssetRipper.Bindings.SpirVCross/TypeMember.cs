@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AssetRipper.Bindings.SpirVCross;
 
@@ -38,6 +39,7 @@ public readonly struct TypeMember
 
 	public Type MemberType => IsNull ? default : Compiler.GetTypeHandle(MemberTypeId);
 
+	[DisallowNull]
 	public string? Name
 	{
 		get => IsNull ? null : Compiler.GetMemberNameS(DeclaringTypeId, Index);

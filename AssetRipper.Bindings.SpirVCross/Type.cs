@@ -1,5 +1,6 @@
 ﻿using AssetRipper.Bindings.SpirVCross.LowLevel;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AssetRipper.Bindings.SpirVCross;
 
@@ -13,6 +14,7 @@ public unsafe readonly partial struct Type
 	public Context Context => Compiler.Context;
 	public bool IsNull => Handle is null;
 
+	[DisallowNull]
 	public readonly string? Name
 	{
 		get
@@ -21,7 +23,7 @@ public unsafe readonly partial struct Type
 		}
 		set
 		{
-			if (!IsNull && !string.IsNullOrEmpty(value))
+			if (!IsNull)
 			{
 				Compiler.SetName(Id, value);
 			}
